@@ -2,7 +2,7 @@
 # #############
 # Purpose: Function to run a species distribution model using GBIF distribution
 # data and WorldClim, ProtectedAreas, OpenStreetMap, SRTM environmental data.
-# Author: Matthias F. Biber
+# Author: RS-eco
 # R version and packages: R 3.2.4 Revised (2016-03-16 r70336) -- "Very Secure Dishes"
 # #############
 
