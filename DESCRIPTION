@@ -1,0 +1,24 @@
+Package: climateNiche
+Type: Package
+Title: R package for analysing the climatic niche of a species
+Version: 0.0.1
+Date: 2022-12-08
+Authors@R: 
+    person("RS-eco", email = "rs-eco@posteo.de", role = c("cre", "aut"))
+Maintainer: RS-eco <rs-eco@posteo.de>
+Description: R package for analysing the climatic niche of a species by 
+    utilising information from IUCN, GBIF, eBird and Worldclim.
+Depends: R (>= 3.5.0)
+Imports: adehabitatHR, dplyr, ggplot2, grDevices, magrittr, 
+    methods, outliers, raster, rlang, sf, sp, ggsci,
+    tidyr, tidyselect, utils, zoo
+Suggests: knitr, rmarkdown, rgbif, rebird
+License: GPL (>= 3)
+LazyData: TRUE
+VignetteBuilder: knitr
+RoxygenNote: 7.2.2
+Encoding: UTF-8
+NeedsCompilation: no
+Author: RS-eco [cre, aut]
+URL: https://github.com/RS-eco/climateNiche
+BugReports: https://github.com/RS-eco/climateNiche/issues

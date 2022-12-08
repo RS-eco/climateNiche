@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="RS-eco" />
+
+<meta name="date" content="2019-09-09" />
+
+<title>Extract GBIF data for small-ranging IUCN species</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Extract GBIF data for small-ranging IUCN species</h1>
+<h4 class="author">RS-eco</h4>
+<h4 class="date">2019-09-09</h4>
+
+
+
+<p>Set file directory and load required packages</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">#Automatically install required packages, which are not yet installed</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">packages &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;raster&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;tidyr&quot;</span>, <span class="st">&quot;remotes&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">new.packages &lt;-<span class="st"> </span>packages[<span class="op">!</span>(packages <span class="op">%in%</span><span class="st"> </span><span class="kw">installed.packages</span>()[,<span class="st">&quot;Package&quot;</span>])]</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="cf">if</span>(<span class="kw">length</span>(new.packages)) <span class="kw">install.packages</span>(new.packages); <span class="kw">rm</span>(new.packages)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co"># Load packages</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">l &lt;-<span class="st"> </span><span class="kw">sapply</span>(packages, require, <span class="dt">character.only =</span> <span class="ot">TRUE</span>, <span class="dt">quietly=</span><span class="ot">TRUE</span>); <span class="kw">rm</span>(packages, l)</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co"># Instal missing packages from GitHub</span></a>
+<a class="sourceLine" id="cb1-10" data-line-number="10">packages_github &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;rasterSp&quot;</span>, <span class="st">&quot;climateNiche&quot;</span>)</a>
+<a class="sourceLine" id="cb1-11" data-line-number="11">new.packages &lt;-<span class="st"> </span>packages_github[<span class="op">!</span>(packages_github <span class="op">%in%</span><span class="st"> </span><span class="kw">installed.packages</span>()[,<span class="st">&quot;Package&quot;</span>])]</a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="cf">if</span>(<span class="kw">length</span>(new.packages)) remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="kw">paste0</span>(<span class="st">&quot;RS-eco/&quot;</span>, new.packages))</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="kw">rm</span>(new.packages)</a></code></pre></div>
+<div id="get-species-names" class="section level2">
+<h2>Get species names</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Load small range data</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">data</span>(<span class="st">&quot;amphibians_dist_smallrange&quot;</span>, <span class="dt">package=</span><span class="st">&quot;rasterSp&quot;</span>)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw">data</span>(<span class="st">&quot;ter_birds_dist_smallrange&quot;</span>, <span class="dt">package=</span><span class="st">&quot;rasterSp&quot;</span>)</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="kw">data</span>(<span class="st">&quot;ter_mammals_dist_smallrange&quot;</span>, <span class="dt">package=</span><span class="st">&quot;rasterSp&quot;</span>)</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="co"># Get species names</span></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">amphinames &lt;-<span class="st"> </span><span class="kw">as.character</span>(<span class="kw">unique</span>(amphibians_dist_smallrange<span class="op">$</span>species))</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8">avesnames &lt;-<span class="st"> </span><span class="kw">as.character</span>(<span class="kw">unique</span>(ter_birds_dist_smallrange<span class="op">$</span>species))</a>
+<a class="sourceLine" id="cb2-9" data-line-number="9">mamanames &lt;-<span class="st"> </span><span class="kw">as.character</span>(<span class="kw">unique</span>(ter_mammals_dist_smallrange<span class="op">$</span>species))</a></code></pre></div>
+</div>
+<div id="retrieve-gbif-data" class="section level2">
+<h2>Retrieve GBIF data</h2>
+<p>For information on how to create the gbif_database, see the <code>vignette(&quot;create-gbif-db&quot;)</code> vignette.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># Connect to GBIF database</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">con &lt;-<span class="st"> </span>DBI<span class="op">::</span><span class="kw">dbConnect</span>(RSQLite<span class="op">::</span><span class="kw">SQLite</span>(), </a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">                      <span class="dt">dbname=</span><span class="kw">paste0</span>(filedir,<span class="st">&quot;/gbif_database.sqlite&quot;</span>))</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">gbif &lt;-<span class="st"> </span><span class="kw">tbl</span>(con, <span class="st">&quot;gbif&quot;</span>)</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="co"># Run loop for all species of each of the three taxa</span></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">dataG &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="cf">function</span>(j){</a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">  taxa &lt;-<span class="st"> </span><span class="kw">list</span>(amphinames, mamanames, avesnames)[[j]]</a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">  dataG &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(taxa)){</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">    <span class="co">#collect data from gbif</span></a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">    data &lt;-<span class="st"> </span>gbif <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(species <span class="op">==</span><span class="st"> </span>taxa[i]) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">data.frame</span>()</a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">    <span class="co">#get rid of data missing long or lat</span></a>
+<a class="sourceLine" id="cb3-14" data-line-number="14">    data &lt;-<span class="st"> </span>data[<span class="kw">which</span>(<span class="op">!</span><span class="kw">is.na</span>(data<span class="op">$</span>decimallatitude) <span class="op">&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.na</span>(data<span class="op">$</span>decimallongitude)),]</a>
+<a class="sourceLine" id="cb3-15" data-line-number="15">    </a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">    dataG[[taxa[[i]]]] &lt;-<span class="st"> </span>data</a>
+<a class="sourceLine" id="cb3-17" data-line-number="17">    </a>
+<a class="sourceLine" id="cb3-18" data-line-number="18">    <span class="co">#I added a break-signal after reaching x species for testing</span></a>
+<a class="sourceLine" id="cb3-19" data-line-number="19">    <span class="co">#if(i == 50){break}</span></a>
+<a class="sourceLine" id="cb3-20" data-line-number="20">  }</a>
+<a class="sourceLine" id="cb3-21" data-line-number="21">  <span class="kw">return</span>(dataG)</a>
+<a class="sourceLine" id="cb3-22" data-line-number="22">})</a>
+<a class="sourceLine" id="cb3-23" data-line-number="23"></a>
+<a class="sourceLine" id="cb3-24" data-line-number="24"><span class="co"># Disconnect from database</span></a>
+<a class="sourceLine" id="cb3-25" data-line-number="25">DBI<span class="op">::</span><span class="kw">dbDisconnect</span>(con); <span class="kw">rm</span>(gbif,con)</a>
+<a class="sourceLine" id="cb3-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb3-27" data-line-number="27"><span class="co"># Assign correct filename to data</span></a>
+<a class="sourceLine" id="cb3-28" data-line-number="28"><span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>){<span class="kw">assign</span>(<span class="dt">x=</span><span class="kw">paste0</span>(<span class="kw">c</span>(<span class="st">&quot;amphibians&quot;</span>, <span class="st">&quot;ter_mammals&quot;</span>, <span class="st">&quot;ter_birds&quot;</span>)[j], <span class="st">&quot;_smallrange_GBIF&quot;</span>), <span class="dt">value=</span>dataG[[j]])}</a></code></pre></div>
+</div>
+<div id="rasterize-data" class="section level2">
+<h2>Rasterize Data</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">data &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="cf">function</span>(j){</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">  r_dataG &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">  dataLess2G &lt;-<span class="st"> </span><span class="kw">character</span>()</a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">  group &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;amphibians&quot;</span>, <span class="st">&quot;ter_mammals&quot;</span>, <span class="st">&quot;ter_birds&quot;</span>)[j]</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">  dataG &lt;-<span class="st"> </span><span class="kw">get</span>(<span class="kw">load</span>(<span class="kw">paste0</span>(<span class="st">&quot;data/&quot;</span>, group, <span class="st">&quot;_smallrange_GBIF.rda&quot;</span>)))</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(dataG)){</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">    <span class="co">#collect data from List</span></a>
+<a class="sourceLine" id="cb4-8" data-line-number="8">    data &lt;-<span class="st"> </span>dataG[[i]]</a>
+<a class="sourceLine" id="cb4-9" data-line-number="9">    <span class="co">#data should have at least 2 data points</span></a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">    <span class="cf">if</span>(<span class="kw">length</span>(<span class="kw">unique</span>(data<span class="op">$</span>decimallatitude))<span class="op">+</span><span class="kw">length</span>(<span class="kw">unique</span>(data<span class="op">$</span>decimallongitude))<span class="op">&gt;=</span><span class="dv">4</span>){</a>
+<a class="sourceLine" id="cb4-11" data-line-number="11">      <span class="co">#rasterizePoints</span></a>
+<a class="sourceLine" id="cb4-12" data-line-number="12">      r_data &lt;-<span class="st"> </span>rasterSp<span class="op">::</span><span class="kw">rasterizePoints</span>(data,<span class="dt">long =</span> <span class="st">&quot;decimallongitude&quot;</span>, </a>
+<a class="sourceLine" id="cb4-13" data-line-number="13">                                          <span class="dt">lat =</span> <span class="st">&quot;decimallatitude&quot;</span>, <span class="dt">res =</span> <span class="fl">0.25</span>); <span class="kw">rm</span>(data)</a>
+<a class="sourceLine" id="cb4-14" data-line-number="14">      <span class="kw">names</span>(r_data) &lt;-<span class="st"> </span><span class="kw">names</span>(dataG)[[i]]</a>
+<a class="sourceLine" id="cb4-15" data-line-number="15">      r_dataG[[i]] &lt;-<span class="st"> </span>r_data; <span class="kw">rm</span>(r_data)</a>
+<a class="sourceLine" id="cb4-16" data-line-number="16">    } <span class="cf">else</span>{</a>
+<a class="sourceLine" id="cb4-17" data-line-number="17">      <span class="co">#  #if there are less than 2 data-points the species name is saved in another list, to have</span></a>
+<a class="sourceLine" id="cb4-18" data-line-number="18">      <span class="co">#  #the opportunity to check for errors in the data-set like spelling-errors etc.</span></a>
+<a class="sourceLine" id="cb4-19" data-line-number="19">      dataLess2G[[i]] &lt;-<span class="st"> </span><span class="kw">names</span>(dataG)[[i]]; <span class="kw">rm</span>(data)</a>
+<a class="sourceLine" id="cb4-20" data-line-number="20">    }</a>
+<a class="sourceLine" id="cb4-21" data-line-number="21">    <span class="co">#I added a break-signal after reaching x species for testing</span></a>
+<a class="sourceLine" id="cb4-22" data-line-number="22">    <span class="co">#if(i == 50){break}</span></a>
+<a class="sourceLine" id="cb4-23" data-line-number="23">  }</a>
+<a class="sourceLine" id="cb4-24" data-line-number="24">  <span class="co">#save the Data as rasterStack</span></a>
+<a class="sourceLine" id="cb4-25" data-line-number="25">  r_dataG &lt;-<span class="st"> </span><span class="kw">Filter</span>(<span class="kw">Negate</span>(is.null), r_dataG)</a>
+<a class="sourceLine" id="cb4-26" data-line-number="26">  r_dataG &lt;-<span class="st"> </span>raster<span class="op">::</span><span class="kw">stack</span>(r_dataG)</a>
+<a class="sourceLine" id="cb4-27" data-line-number="27">  <span class="kw">return</span>(r_dataG)</a>
+<a class="sourceLine" id="cb4-28" data-line-number="28">})</a></code></pre></div>
+</div>
+<div id="data-summary" class="section level2">
+<h2>Data summary</h2>
+<p>Get data, turn into dataframe and combine all three taxa</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co">#convert to one data.frame</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">amphiSmall_GBIF &lt;-<span class="st"> </span><span class="kw">do.call</span>(<span class="st">&quot;rbind&quot;</span>, amphibians_smallrange_GBIF)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">mamaSmall_GBIF &lt;-<span class="st"> </span><span class="kw">do.call</span>(<span class="st">&quot;rbind&quot;</span>, ter_mammals_smallrange_GBIF)</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">avesSmall_GBIF &lt;-<span class="st"> </span><span class="kw">do.call</span>(<span class="st">&quot;rbind&quot;</span>, ter_birds_smallrange_GBIF)</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">amphiSmall_GBIF<span class="op">$</span>taxa &lt;-<span class="st"> &quot;amphibians&quot;</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">amphiSmall_GBIF<span class="op">$</span>total &lt;-<span class="st"> </span><span class="kw">length</span>(amphinames)</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">mamaSmall_GBIF<span class="op">$</span>taxa &lt;-<span class="st"> &quot;ter_mammals&quot;</span></a>
+<a class="sourceLine" id="cb5-9" data-line-number="9">mamaSmall_GBIF<span class="op">$</span>total &lt;-<span class="st"> </span><span class="kw">length</span>(mamanames)</a>
+<a class="sourceLine" id="cb5-10" data-line-number="10">avesSmall_GBIF<span class="op">$</span>taxa &lt;-<span class="st"> &quot;ter_birds&quot;</span></a>
+<a class="sourceLine" id="cb5-11" data-line-number="11">avesSmall_GBIF<span class="op">$</span>total &lt;-<span class="st"> </span><span class="kw">length</span>(avesnames)</a>
+<a class="sourceLine" id="cb5-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb5-13" data-line-number="13">alltaxa_small_GBIF &lt;-<span class="st"> </span><span class="kw">rbind</span>(amphiSmall_GBIF, mamaSmall_GBIF, avesSmall_GBIF)</a></code></pre></div>
+<p>Check number of species with GBIF data</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">alltaxa_small_GBIF <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(taxa, species, total) <span class="op">%&gt;%</span><span class="st"> </span>tidyr<span class="op">::</span><span class="kw">drop_na</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="st">  </span><span class="kw">group_by</span>(taxa) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">n_distinct</span>(species), <span class="dt">total=</span><span class="kw">mean</span>(total)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">perc =</span> <span class="kw">round</span>(n<span class="op">/</span>total<span class="op">*</span><span class="dv">100</span>, <span class="dt">digits=</span><span class="dv">2</span>)) <span class="op">%&gt;%</span><span class="st"> </span>knitr<span class="op">::</span><span class="kw">kable</span>()</a></code></pre></div>
+<p>Check number of species with GBIF data and more than 10 occurrences</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">alltaxa_small_GBIF <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(taxa, species, total) <span class="op">%&gt;%</span><span class="st"> </span>tidyr<span class="op">::</span><span class="kw">drop_na</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="st">  </span><span class="kw">group_by</span>(species) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">n</span>() <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(taxa) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">n_distinct</span>(species), <span class="dt">total=</span><span class="kw">mean</span>(total)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">perc =</span> <span class="kw">round</span>(n<span class="op">/</span>total<span class="op">*</span><span class="dv">100</span>, <span class="dt">digits=</span><span class="dv">2</span>)) <span class="op">%&gt;%</span><span class="st"> </span>knitr<span class="op">::</span><span class="kw">kable</span>()</a></code></pre></div>
+</div>
+<div id="plot-species-occurrence" class="section level2">
+<h2>Plot species occurrence</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">group &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;amphibians&quot;</span>, <span class="st">&quot;ter_mammals&quot;</span>, <span class="st">&quot;ter_birds&quot;</span>)[<span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="co"># Create plot</span></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">climateNiche<span class="op">::</span><span class="kw">plotSp</span>(r_dataG[[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]])</a></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

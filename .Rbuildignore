@@ -1,0 +1,12 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+data-raw
+figures
+R/getebird.R
+R/marineSDM.R
+R/plotOMI.R
+R/terrestrialSDM.R
+README.Rmd
+cmip5
+wc10
+^LICENSE\.md$
