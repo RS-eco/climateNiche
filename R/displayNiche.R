@@ -313,10 +313,10 @@ displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10,
   # Determine orientation of axes label and plot margins
   if(length(variables) > 5 | tres == "month"){
     las=2
-    graphics::par(mar = c(4.5,5,1.5,7.5)+.1, bg="transparent", cex.lab=1.5, cex.axis=1.2)
+    graphics::par(mar = c(4.5,5,1.5,7.5)+.1, bg="white", cex.lab=1.5, cex.axis=1.2)
   } else{
     las=1
-    graphics::par(mar = c(2.5,5,1.5,7.5)+.1, bg="transparent", cex.lab=1.5, cex.axis=1.2)
+    graphics::par(mar = c(2.5,5,1.5,7.5)+.1, bg="white", cex.lab=1.5, cex.axis=1.2)
   }
   
   # Create plot
