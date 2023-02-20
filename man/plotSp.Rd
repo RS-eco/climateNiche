@@ -8,10 +8,11 @@ plotSp(
   data,
   name = "",
   extent = NA,
-  country = TRUE,
+  world = TRUE,
   cut = FALSE,
   grid = FALSE,
   save = FALSE,
+  geom = "tile",
   filename,
   dpi = 300,
   width = NA,
@@ -26,13 +27,15 @@ plotSp(
 
 \item{extent}{Specify extent of your Map}
 
-\item{country}{Should country outline be plotted or not}
+\item{world}{Should world map outline be plotted or not}
 
 \item{cut}{logical. Cut outline by extent}
 
 \item{grid}{logical. Should grid lines and axes be drawn or not}
 
 \item{save}{logical. If TRUE plot object is saved, see also the subsequent parameters.}
+
+\item{geom}{One of raster, tile or point. Default is tile.}
 
 \item{filename}{character. File name to create on disk.}
 

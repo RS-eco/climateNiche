@@ -134,13 +134,11 @@ climateEnvelope <- function(data, climate="worldclim", model="MI",
     
     # Create plot
     p <- ggplot2::ggplot() + 
-      ggplot2::geom_point(data=envdata[envdata$year == levels(envdata$year)[1],], 
-                          ggplot2::aes_string(x="bio12",y="bio1"), fill=NA, colour="black",alpha=0.1) + 
-      ggplot2::geom_point(data=envdata[envdata$year == levels(envdata$year)[2],], 
-                          ggplot2::aes_string(x="bio12",y="bio1"), fill=NA, colour="red", alpha=0.1) + 
+      ggplot2::geom_point(data=envdata, ggplot2::aes_string(x="bio12",y="bio1", colour="year"), fill=NA, alpha=0.1) + 
       ggplot2::geom_polygon(data=poly_cur, ggplot2::aes_string(x="x",y="y"), fill=NA, colour="black") + 
       ggplot2::geom_polygon(data=poly_fut, ggplot2::aes_string(x="x",y="y"), fill=NA, colour="red") + 
-      ggplot2::theme_bw() + ggplot2::labs(x="Total annual precipitation [mm]", y=expression("Annual mean temperature [", degree,"C]"))
+      ggplot2::theme_bw() + ggplot2::labs(x="Total annual precipitation (mm)", y = expression("Annual mean temperature " ( degree~C))) + 
+      ggplot2::scale_color_manual(name="Year", values=c("black", "red")) + ggplot2::theme(legend.position=c(0.9,0.9))
   } else if(method=="MCP"){
     ## Method 2 ##
     ## Calculate minimum convex polygon of climatic niche
@@ -152,15 +150,13 @@ climateEnvelope <- function(data, climate="worldclim", model="MI",
     envdata <- data.frame(envdata)
     
     p <- ggplot2::ggplot() + 
-      ggplot2::geom_point(data=envdata[envdata$year == levels(envdata$year)[1],], 
-                          ggplot2::aes_string(x="bio12",y="bio1"), fill=NA, colour="black",alpha=0.1) + 
-      ggplot2::geom_point(data=envdata[envdata$year == levels(envdata$year)[2],], 
-                          ggplot2::aes_string(x="bio12",y="bio1"), fill=NA, colour="red", alpha=0.1) + 
+      ggplot2::geom_point(data=envdata, ggplot2::aes_string(x="bio12",y="bio1", colour="year"), fill=NA, alpha=0.1) + 
       ggplot2::geom_polygon(data=mcp1, ggplot2::aes_string(x="long", y="lat"), 
                             colour="black", alpha=0.05, fill=NA) +
       ggplot2::geom_polygon(data=mcp2, ggplot2::aes_string(x="long", y="lat"), 
                             colour="red", alpha=0.05, fill=NA) + 
-      ggplot2::theme_bw() +  ggplot2::labs(x="Total annual precipitation [mm]", y=expression("Annual mean temperature [", degree,"C]"))
+      ggplot2::theme_bw() +  ggplot2::labs(x="Total annual precipitation (mm)", y = expression("Annual mean temperature " ( degree~C))) + 
+      ggplot2::scale_color_manual(name="Year", values=c("black", "red")) + ggplot2::theme(legend.position=c(0.9,0.9))
   } else if(method == "MFB"){
     ## Method 3
     requireNamespace("sf")
@@ -183,14 +179,12 @@ climateEnvelope <- function(data, climate="worldclim", model="MI",
     envdata_poly[[1]] <- methods::as(envdata_poly[[1]], "Spatial")
     envdata_poly[[2]] <- methods::as(envdata_poly[[2]], "Spatial")
     p <- ggplot2::ggplot() + 
-      ggplot2::geom_point(data=envdata[envdata$year == levels(envdata$year)[1],], 
-                          ggplot2::aes_string(x="bio12",y="bio1"), fill=NA, colour="black",alpha=0.1) + 
-      ggplot2::geom_point(data=envdata[envdata$year == levels(envdata$year)[2],], 
-                          ggplot2::aes_string(x="bio12",y="bio1"), fill=NA, colour="red", alpha=0.1) + 
+      ggplot2::geom_point(data=envdata, ggplot2::aes_string(x="bio12",y="bio1", colour="year"), fill=NA, alpha=0.1) + 
       ggplot2::geom_polygon(data=envdata_poly[[1]], ggplot2::aes_string(x="long", y="lat"), 
                             colour="black", alpha=0.05, fill=NA) +
       ggplot2::geom_polygon(data=envdata_poly[[2]], ggplot2::aes_string(x="long", y="lat"), colour="red", alpha=0.05, fill=NA) + 
-      ggplot2::theme_bw() +  ggplot2::labs(x="Total annual precipitation [mm]", y=expression(paste("Annual mean temperature [",degree,"C]")))
+      ggplot2::theme_bw() +  ggplot2::labs(x="Total annual precipitation (mm)", y = expression("Annual mean temperature " ( degree~C))) + 
+      ggplot2::scale_color_manual(name="Year", values=c("black", "red")) + ggplot2::theme(legend.position=c(0.9,0.9))
   }
   return(p)
 }

@@ -331,10 +331,10 @@ sp_month@data %>% group_by(month) %>% summarise(tmean=mean(env_locs, na.rm=T)) %
   knitr::kable()
 ```
 
-|       |          |           |          |          |           |           |           |           |           |           |          |           |
-|:------|:---------|:----------|:---------|:---------|:----------|:----------|:----------|:----------|:----------|:----------|:---------|:----------|
-| Month | Jan      | Feb       | Mar      | Apr      | May       | Jun       | Jul       | Aug       | Sep       | Oct       | Nov      | Dec       |
-| tmean | 1.070167 | -1.277019 | 1.245238 | 7.888911 | 13.263881 | 17.418037 | 17.780594 | 17.780049 | 14.573226 | 10.576364 | 7.313480 | -1.008846 |
+|       |           |            |           |           |            |            |            |            |            |            |           |            |
+|:------|:----------|:-----------|:----------|:----------|:-----------|:-----------|:-----------|:-----------|:-----------|:-----------|:----------|:-----------|
+| Month | Jan       | Feb        | Mar       | Apr       | May        | Jun        | Jul        | Aug        | Sep        | Oct        | Nov       | Dec        |
+| tmean | 1.0690476 | -1.2251497 | 1.3756536 | 7.9549533 | 13.2430175 | 17.1804675 | 17.9438335 | 17.8309858 | 14.7379603 | 10.5456710 | 6.8436364 | -0.7633238 |
 
 ## Visualise climatic niche
 
@@ -348,7 +348,7 @@ Annual temperature (min/max) & precipitation niche of GBIF data
 
 ``` r
 # Display temperature and precipitation niche using Worldclim data
-displayNiche(data=data.frame(sp_data), res=10, var=c("tmin", "tmax", "prec"), path=filedir)
+displayNiche(data=data.frame(sp_data), res=10, variables=c("tmin", "tmax", "prec"), path=filedir)
 ```
 
 <img src="figures/displayNiche-1.png" style="display: block; margin: auto;" />
@@ -357,7 +357,7 @@ Bioclim niche from IUCN range Map
 
 ``` r
 # Display bioclimatic niche using Worldclim data
-displayNiche(data=Passer_domesticus, res=10, var=c("tmax", "prec"), path=filedir)
+displayNiche(data=Passer_domesticus, res=10, variables=c("tmax", "prec"), path=filedir)
 ```
 
 <img src="figures/unnamed-chunk-13-1.png" style="display: block; margin: auto;" />
@@ -367,15 +367,14 @@ maximum temperature and precipitation data and qua
 
 ``` r
 # Plot the monthly climatic niche of a species
-displayNiche(data=Passer_domesticus, path=filedir, var=c("tmax"), 
-             tres="month", res=10)
+displayNiche(data=Passer_domesticus, path=filedir, variables=c("tmax"), tres="month", res=10)
 
 # Plot the monthly climatic niche of a species
-displayNiche(data=Passer_domesticus, path=filedir, var=c("tmax", "prec"), 
+displayNiche(data=Passer_domesticus, path=filedir, variables=c("tmax", "prec"), 
              tres="month", res=10)
 
 # Plot the quarterly climatic niche of a species
-displayNiche(data=Passer_domesticus, path=filedir, var=c("tmin", "tmax", "prec"), 
+displayNiche(data=Passer_domesticus, path=filedir, variables=c("tmin", "tmax", "prec"), 
              tres="quarter", res=10)
 ```
 
@@ -416,7 +415,7 @@ bioclimatic variables (bio5, bio12, bio15)
 
 ``` r
 # Compare the climatic niche of four species
-displayNiche(data=Passer_spp4, path=filedir, var=c("bio5", "bio12", "bio15"), res=10)
+displayNiche(data=Passer_spp4, path=filedir, variables=c("bio5", "bio12", "bio15"), res=10)
 ```
 
 ![](figures/unnamed-chunk-15-1.png)<!-- -->
@@ -453,7 +452,7 @@ plotSp(data=Passer_data, name="Data source", extent=c(-180, 180, -65, 90))
 
 ``` r
 # Compare the climatic niche of two datasets
-displayNiche(data=Passer_data, var=c("tmin", "tmax", "prec"), path=filedir, res=10)
+displayNiche(data=Passer_data, variables=c("tmin", "tmax", "prec"), path=filedir, res=10)
 ```
 
 ![](figures/unnamed-chunk-19-1.png)<!-- -->

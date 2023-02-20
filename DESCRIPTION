@@ -2,7 +2,7 @@ Package: climateNiche
 Type: Package
 Title: R package for analysing the climatic niche of a species
 Version: 0.0.1
-Date: 2022-12-08
+Date: 2023-02-20
 Authors@R: 
     person("RS-eco", email = "rs-eco@posteo.de", role = c("cre", "aut"))
 Maintainer: RS-eco <rs-eco@posteo.de>
@@ -16,7 +16,7 @@ Suggests: knitr, rmarkdown, rgbif, rebird
 License: GPL (>= 3)
 LazyData: TRUE
 VignetteBuilder: knitr
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 NeedsCompilation: no
 Author: RS-eco [cre, aut]

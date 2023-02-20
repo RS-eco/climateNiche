@@ -304,29 +304,28 @@ Annual temperature (min/max) & precipitation niche of GBIF data
 
 ```{r displayNiche, fig.width=8, fig.height=6, fig.align="center"}
 # Display temperature and precipitation niche using Worldclim data
-displayNiche(data=data.frame(sp_data), res=10, var=c("tmin", "tmax", "prec"), path=filedir)
+displayNiche(data=data.frame(sp_data), res=10, variables=c("tmin", "tmax", "prec"), path=filedir)
 ```
 
 Bioclim niche from IUCN range Map
 
 ```{r fig.width=8, fig.height=6, fig.align="center"}
 # Display bioclimatic niche using Worldclim data
-displayNiche(data=Passer_domesticus, res=10, var=c("tmax", "prec"), path=filedir)
+displayNiche(data=Passer_domesticus, res=10, variables=c("tmax", "prec"), path=filedir)
 ```
 
 Compare the climatic niche of one species using monthly and quarterly maximum temperature and precipitation data and qua
 
 ```{r, fig.show='hold'}
 # Plot the monthly climatic niche of a species
-displayNiche(data=Passer_domesticus, path=filedir, var=c("tmax"), 
-             tres="month", res=10)
+displayNiche(data=Passer_domesticus, path=filedir, variables=c("tmax"), tres="month", res=10)
 
 # Plot the monthly climatic niche of a species
-displayNiche(data=Passer_domesticus, path=filedir, var=c("tmax", "prec"), 
+displayNiche(data=Passer_domesticus, path=filedir, variables=c("tmax", "prec"), 
              tres="month", res=10)
 
 # Plot the quarterly climatic niche of a species
-displayNiche(data=Passer_domesticus, path=filedir, var=c("tmin", "tmax", "prec"), 
+displayNiche(data=Passer_domesticus, path=filedir, variables=c("tmin", "tmax", "prec"), 
              tres="quarter", res=10)
 ```
 
@@ -358,7 +357,7 @@ Compare the climatic niche of four species using the most important bioclimatic 
 
 ```{r}
 # Compare the climatic niche of four species
-displayNiche(data=Passer_spp4, path=filedir, var=c("bio5", "bio12", "bio15"), res=10)
+displayNiche(data=Passer_spp4, path=filedir, variables=c("bio5", "bio12", "bio15"), res=10)
 ```
 
 # Plot climate envelope
@@ -389,5 +388,5 @@ plotSp(data=Passer_data, name="Data source", extent=c(-180, 180, -65, 90))
 
 ```{r}
 # Compare the climatic niche of two datasets
-displayNiche(data=Passer_data, var=c("tmin", "tmax", "prec"), path=filedir, res=10)
+displayNiche(data=Passer_data, variables=c("tmin", "tmax", "prec"), path=filedir, res=10)
 ```

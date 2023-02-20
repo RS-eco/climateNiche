@@ -10,12 +10,13 @@ displayNiche(
   lat = "y",
   name = "worldclim",
   res = 10,
-  var = c("tmin", "tmax", "prec"),
+  variables = c("tmin", "tmax", "prec"),
   tres = "year",
   path = "",
   extent = NA,
   hist = FALSE,
-  map = FALSE
+  map = FALSE,
+  download = TRUE
 )
 }
 \arguments{
@@ -30,7 +31,7 @@ also takes a list}
 
 \item{res}{specifying the desired spatial resolution. Valid resolutions are 0.5, 2.5, 5, 10 (minutes of a degree).}
 
-\item{var}{specifying which variable to get, can be tmin, tmax and/or prec or bio.}
+\item{variables}{specifying which variables to get, can be tmin, tmax and/or prec or bio.}
 
 \item{tres}{specifying the desired temporal resolution. One of year, month, quarter.}
 
@@ -41,6 +42,9 @@ also takes a list}
 \item{hist}{logical. specify if a histogram should be added to the plot.}
 
 \item{map}{logical. specify if a map should be added to the plot.}
+
+\item{download}{logical. download worldclim data or not. If download=FALSE the bioclimatic variables need to be provided with the data
+that is inserted into the function and bioclimatic variables need to be named accordingly (bio1, bio2, ...).}
 }
 \value{
 plot of climatic niche of species
@@ -57,19 +61,19 @@ library(climateNiche)
 data(Passer_domesticus)
 
 # Create plot of climatic niche
-displayNiche(data=Passer_domesticus, var=c("tmax", "prec"), tres="month")
+displayNiche(data=Passer_domesticus, variables=c("tmax", "prec"), tres="month")
 
 # Load Great sparrow data
 data(Passer_motitensis)
 
 # Create plot of climatic niche
-displayNiche(data=Passer_motitensis, var=c("tmin", "tmax", "prec"), tres="quarter")
+displayNiche(data=Passer_motitensis, variables=c("tmin", "tmax", "prec"), tres="quarter")
 
 # Create list of the two species
 Passer_spp <- list(Passer_domesticus, Passer_motitensis)
 
 # Create plot of climatic niche
-displayNiche(data=Passer_spp, var=c("tmin", "tmax"))
+displayNiche(data=Passer_spp, variables=c("tmin", "tmax"))
 
 # Load data of the Somali sparrow & the Asian desert sparrow
 data(Passer_castanopterus)
@@ -80,5 +84,5 @@ Passer_spp4 <- list(Passer_castanopterus, Passer_domesticus,
                     Passer_motitensis, Passer_zarudnyi)
 
 # Create plot of climatic niche
-displayNiche(data=Passer_spp4, var=c("tmin", "tmax", "prec"))
+displayNiche(data=Passer_spp4, variables=c("tmin", "tmax", "prec"))
 }

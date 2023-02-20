@@ -5,10 +5,11 @@
 #' @param data RasterLayer, SpatialPointsDataFrame or data.frame
 #' @param name character. Adds a name to the legend if provided.
 #' @param extent Specify extent of your Map
-#' @param country Should country outline be plotted or not
+#' @param world Should world map outline be plotted or not
 #' @param cut logical. Cut outline by extent
 #' @param grid logical. Should grid lines and axes be drawn or not
 #' @param save logical. If TRUE plot object is saved, see also the subsequent parameters.
+#' @param geom One of raster, tile or point. Default is tile.
 #' @param filename character. File name to create on disk.
 #' @param dpi numeric. Plot resolution. 
 #' @param width,height,units Plot size in units ("in", "cm", or "mm"). If not supplied, uses the size of current graphics device.
@@ -21,7 +22,7 @@
 #' plotSp(data=Passer_domesticus)
 #' }
 #' @export
-plotSp <- function(data, name="", extent=NA, country=TRUE, cut=FALSE, grid=FALSE, save=FALSE,
+plotSp <- function(data, name="", extent=NA, world=TRUE, cut=FALSE, grid=FALSE, save=FALSE, geom="tile",
                    filename, dpi=300, width=NA, height=NA, units=c("in", "cm", "mm")){
   # Convert data to dataframe
   if(any(is(data) %in% c("RasterStack", "RasterBrick"))){data <- raster::unstack(data)}
@@ -68,7 +69,7 @@ plotSp <- function(data, name="", extent=NA, country=TRUE, cut=FALSE, grid=FALSE
   # Define extent
   if(anyNA(extent)){
     extent <- raster::extent(c(min(data$x), max(data$x), min(data$y), max(data$y)))
-  }else if(any(is(extent) != "Extent")){
+  } else if(any(is(extent) != "Extent")){
     extent <- raster::extent(extent)
   }
   
@@ -76,27 +77,58 @@ plotSp <- function(data, name="", extent=NA, country=TRUE, cut=FALSE, grid=FALSE
   data(outline, package="ggmap2", envir = environment())
   if(cut == TRUE){
     # and crop by extent
-    outline <- raster::crop(outline, extent)
+    outline <- sf::st_crop(outline, extent)
   }
   
   # Add colours and names
   if(nlevels(factor(data$label)) == 1){
-    p <- ggplot2::ggplot() + ggplot2::geom_tile(data=data, ggplot2::aes_string(x="x",y="y", fill="label")) + 
-      ggplot2::scale_fill_manual(name=name, values=c("blue"), na.value="transparent") + 
-      ggplot2::theme_classic() + ggplot2::theme(axis.title = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
-                                                axis.ticks = ggplot2::element_blank(), axis.text = ggplot2::element_blank(),
-                                                panel.grid = ggplot2::element_blank(), legend.position="none")
+    if(geom == "tile"){
+      p <- ggplot2::ggplot() + ggplot2::geom_tile(data=data, ggplot2::aes_string(x="x",y="y", fill="label")) + 
+        ggplot2::scale_fill_manual(name=name, values=c("blue"), na.value="transparent") + 
+        ggplot2::theme_classic() + ggplot2::theme(axis.title = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                                  axis.ticks = ggplot2::element_blank(), axis.text = ggplot2::element_blank(),
+                                                  panel.grid = ggplot2::element_blank(), legend.position="none")
+    } else if(geom == "raster"){
+      p <- ggplot2::ggplot() + ggplot2::geom_raster(data=data, ggplot2::aes_string(x="x",y="y", fill="label")) + 
+        ggplot2::scale_fill_manual(name=name, values=c("blue"), na.value="transparent") + 
+        ggplot2::theme_classic() + ggplot2::theme(axis.title = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                                  axis.ticks = ggplot2::element_blank(), axis.text = ggplot2::element_blank(),
+                                                  panel.grid = ggplot2::element_blank(), legend.position="none")
+    } else {
+      p <- ggplot2::ggplot() + ggplot2::geom_point(data=data, ggplot2::aes_string(x="x",y="y", colour="label")) + 
+        ggplot2::scale_colour_manual(name=name, values=c("blue"), na.value="transparent") + 
+        ggplot2::theme_classic() + ggplot2::theme(axis.title = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                                  axis.ticks = ggplot2::element_blank(), axis.text = ggplot2::element_blank(),
+                                                  panel.grid = ggplot2::element_blank(), legend.position="none")
+    }
+    
   } else{
+    if(geom == "tile"){
     p <- ggplot2::ggplot() + ggplot2::geom_tile(data=data, ggplot2::aes_string(x="x",y="y", fill="label")) + 
       ggplot2::scale_fill_manual(name=name, na.value="transparent",
                                  values= ggsci::pal_d3("category10")(nlevels(data$label))) + 
       ggplot2::theme_classic() + ggplot2::theme(axis.title = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                                                 axis.ticks = ggplot2::element_blank(), axis.text = ggplot2::element_blank(),
                                                 panel.grid = ggplot2::element_blank(), legend.position="bottom") 
+    } else if(geom == "raster"){
+      p <- ggplot2::ggplot() + ggplot2::geom_raster(data=data, ggplot2::aes_string(x="x",y="y", fill="label")) + 
+        ggplot2::scale_fill_manual(name=name, na.value="transparent",
+                                   values= ggsci::pal_d3("category10")(nlevels(data$label))) + 
+        ggplot2::theme_classic() + ggplot2::theme(axis.title = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                                  axis.ticks = ggplot2::element_blank(), axis.text = ggplot2::element_blank(),
+                                                  panel.grid = ggplot2::element_blank(), legend.position="bottom") 
+    } else {
+      p <- ggplot2::ggplot() + ggplot2::geom_point(data=data, ggplot2::aes_string(x="x",y="y", colour="label")) + 
+        ggplot2::scale_colour_manual(name=name, na.value="transparent",
+                                   values= ggsci::pal_d3("category10")(nlevels(data$label))) + 
+        ggplot2::theme_classic() + ggplot2::theme(axis.title = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                                  axis.ticks = ggplot2::element_blank(), axis.text = ggplot2::element_blank(),
+                                                  panel.grid = ggplot2::element_blank(), legend.position="bottom") 
+    }
   }
   
-  # Create plot with or without country outline
-  if(country == TRUE){
+  # Create plot with or without world map outline
+  if(world == TRUE){
     p <- p + ggplot2::geom_sf(data=sf::st_as_sf(outline), fill="transparent", color="black") + 
       ggplot2::theme_classic() + 
       ggplot2::theme(axis.title = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),

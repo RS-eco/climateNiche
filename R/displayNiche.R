@@ -10,12 +10,14 @@
 #' @param lat Name of latitude column in data file, default y
 #' @param name specifying which environmental data to use, currently only worldclim is supported.
 #' @param res specifying the desired spatial resolution. Valid resolutions are 0.5, 2.5, 5, 10 (minutes of a degree).
-#' @param var specifying which variable to get, can be tmin, tmax and/or prec or bio.
+#' @param variables specifying which variables to get, can be tmin, tmax and/or prec or bio.
 #' @param tres specifying the desired temporal resolution. One of year, month, quarter.
 #' @param path Character. Path name indicating where to store the data. Default is the current working directory.
 #' @param extent specify extent of area considered
 #' @param hist logical. specify if a histogram should be added to the plot.
 #' @param map logical. specify if a map should be added to the plot.
+#' @param download logical. download worldclim data or not. If download=FALSE the bioclimatic variables need to be provided with the data
+#' that is inserted into the function and bioclimatic variables need to be named accordingly (bio1, bio2, ...).
 #' @return plot of climatic niche of species
 #' @examples
 #' # Load library
@@ -25,19 +27,19 @@
 #' data(Passer_domesticus)
 #' 
 #' # Create plot of climatic niche
-#' displayNiche(data=Passer_domesticus, var=c("tmax", "prec"), tres="month")
+#' displayNiche(data=Passer_domesticus, variables=c("tmax", "prec"), tres="month")
 #' 
 #' # Load Great sparrow data
 #' data(Passer_motitensis)
 #' 
 #' # Create plot of climatic niche
-#' displayNiche(data=Passer_motitensis, var=c("tmin", "tmax", "prec"), tres="quarter")
+#' displayNiche(data=Passer_motitensis, variables=c("tmin", "tmax", "prec"), tres="quarter")
 #' 
 #' # Create list of the two species
 #' Passer_spp <- list(Passer_domesticus, Passer_motitensis)
 #' 
 #' # Create plot of climatic niche
-#' displayNiche(data=Passer_spp, var=c("tmin", "tmax"))
+#' displayNiche(data=Passer_spp, variables=c("tmin", "tmax"))
 #' 
 #' # Load data of the Somali sparrow & the Asian desert sparrow
 #' data(Passer_castanopterus)
@@ -48,12 +50,12 @@
 #'                     Passer_motitensis, Passer_zarudnyi)
 #'
 #' # Create plot of climatic niche
-#' displayNiche(data=Passer_spp4, var=c("tmin", "tmax", "prec"))
+#' displayNiche(data=Passer_spp4, variables=c("tmin", "tmax", "prec"))
 #' @export
 displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10, 
-                         var=c("tmin", "tmax", "prec"), tres="year", 
-                         path='', extent=NA, hist=FALSE, map=FALSE){
-  if(any(var %in% c("bio2", "bio3", "bio4"))){
+                         variables=c("tmin", "tmax", "prec"), tres="year", 
+                         path='', extent=NA, hist=FALSE, map=FALSE, download=TRUE){
+  if(any(variables %in% c("bio2", "bio3", "bio4"))){
     stop("bio2, bio3 and bio4 are currently not supported.")
   }
   
@@ -75,9 +77,13 @@ displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10,
         data <- data %>% dplyr::select(tidyselect::one_of(c("decimallongitude", "decimallatitude", 
                                                             "LONGITUDE", "LATITUDE", "decimalLongitude", 
                                                             "decimalLatitude", "Longitude", "Latitude", 
-                                                            "long", "lat", "Long", "Lat")), tidyselect::one_of(lon, lat), "species")
+                                                            "long", "lat", "Long", "Lat")), 
+                                       tidyselect::one_of(lon, lat), "species", 
+                                       tidyselect::any_of(c("bio1", "bio2", "bio3", "bio4", "bio5", "bio6", "bio7", "bio8", 
+                                                            "bio9", "bio10", "bio11", "bio12", "bio13", "bio14", 
+                                                            "bio15", "bio16", "bio17", "bio18", "bio19")))
         data$presence <- 1
-        colnames(data) <- c(lon, lat, "species", "presence")
+        colnames(data)[1:3] <- c(lon, lat, "species")
       }
       return(data)
     })
@@ -94,9 +100,12 @@ displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10,
                                                         "decimalLatitude", "Longitude", "Latitude", 
                                                         "long", "lat", "Long", "Lat")), tidyselect::one_of(lon, lat), 
                                    tidyselect::one_of(c("species", "SCIENTIFIC.NAME", "scientificName",
-                                                        "scientificname", "name")))
+                                                        "scientificname", "name")),
+                                   tidyselect::any_of(c("bio1", "bio2", "bio3", "bio4", "bio5", "bio6", "bio7", "bio8", 
+                                                                      "bio9", "bio10", "bio11", "bio12", "bio13", "bio14", 
+                                                                      "bio15", "bio16", "bio17", "bio18", "bio19")))
     data$presence <- 1
-    colnames(data) <- c(lon, lat, "species", "presence")
+    colnames(data)[1:3] <- c(lon, lat, "species")
   }
   
   # Determine extent if not provided as input
@@ -111,132 +120,142 @@ displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10,
   # Use bio variables when asking for tres=year (Check it is same as bio!!!)
   
   # Get environmental data
-  if(name=="worldclim"){
-    ####
-    # Remove if(res== 0.5), once ggmap2 function is finished!!!
-    ####
-    #if(res == 0.5){
-    #  if(any(grepl("bio", var))){
-    #    envdata <- ggmap2::getData(name=name, var="bio", res=res, path=path)
-    #    if(unique(var == "bio")){var <- c("bio1", "bio5", "bio6", "bio7", "bio8", "bio9", 
-    #                                      "bio10", "bio11", "bio12", "bio13", "bio14", 
-    #                                      "bio15", "bio16", "bio17", "bio18", "bio19")
-    #    } else{envdata <- envdata[[var]]}
-    #  } else{envdata <- lapply(var, FUN=function(z){ggmap2::getData(name=name, var=z, res=res, path=path)})}
-    #} else{
-    if(any(grepl("bio", var))){
-      # Get data
-      envdata <- raster::getData(name=name, var="bio", res=res, path=path)
-      envdata <- raster::crop(envdata, extent)
-      if(unique(var == "bio")==TRUE){var <- c("bio1", "bio5", "bio6", "bio7", "bio8", "bio9", 
-                                              "bio10", "bio11", "bio12", "bio13", "bio14", 
-                                              "bio15", "bio16", "bio17", "bio18", "bio19")}
-      # Subset data by variables
-      envdata <- envdata[[var]]
-      
-      # Convert temperature values into degree C
-      env_temp <- envdata[[var[var %in% c("bio1", "bio5", "bio6", "bio7", "bio8", "bio9", "bio10", "bio11")]]]/ 10
-      env_prec <- envdata[[var[! var %in% c("bio1", "bio5", "bio6", "bio7", "bio8", "bio9", "bio10", "bio11")]]]
-      envdata <- raster::stack(env_temp, env_prec); rm(env_temp, env_prec)
-    } else{
-      # Get data
-      envdata <- lapply(var, FUN=function(z){
-        data <- raster::getData(name=name, var=z, res=res, path=path)
-        raster::crop(data, extent)})
-      # Convert temperature values into degree C
-      if("tmin" %in% var){envdata[[which(var == "tmin")]] <- envdata[[which(var == "tmin")]]/10}
-      if("tmax" %in% var){envdata[[which(var == "tmax")]] <- envdata[[which(var == "tmax")]]/10}
-    }
-    #}
-  }
-  
-  # Calculate mean and sum by year, quarter or month for tmin, tmax and prec
-  if(unique(var %in% c("tmin", "tmax", "prec")) == TRUE){
-    if(tres == "year"){
-      #Mean of tmin and tmax
-      if("tmin" %in% var){envdata[[which("tmin" == var)]] <- raster::calc(envdata[[which("tmin" == var)]], mean)}
-      if("tmax" %in% var){envdata[[which("tmax" == var)]] <- raster::calc(envdata[[which("tmax" == var)]], mean)}
-      # Sum of prec
-      if("prec" %in% var){envdata[[which("prec" == var)]] <- raster::calc(envdata[[which("prec" == var)]], sum)}
-      
-      # Extract envdata for points
-      envdata <- data.frame(do.call("cbind", lapply(envdata, FUN=function(x){
-        raster::extract(x, data[,c(lon,lat)])})))
-      colnames(envdata) <- var
-    } else if(tres %in% c("quarter", "month")){
-      if(tres == "quarter"){
-        # time
-        tm <- seq(as.Date('1000-01-15'), as.Date('1000-12-15'), 'month') # Year is irrelevant
+  if(download == TRUE){
+    if(name=="worldclim"){
+      ####
+      # Remove if(res== 0.5), once ggmap2 function is finished!!!
+      ####
+      #if(res == 0.5){
+      #  if(any(grepl("bio", variables))){
+      #    envdata <- ggmap2::getData(name=name, var="bio", res=res, path=path)
+      #    if(unique(variables == "bio")){variables <- c("bio1", "bio5", "bio6", "bio7", "bio8", "bio9", 
+      #                                      "bio10", "bio11", "bio12", "bio13", "bio14", 
+      #                                      "bio15", "bio16", "bio17", "bio18", "bio19")
+      #    } else{envdata <- envdata[[variables]]}
+      #  } else{envdata <- lapply(variables, FUN=function(z){ggmap2::getData(name=name, var=z, res=res, path=path)})}
+      #} else{
+      if(any(grepl("bio", variables))){
+        # Get data
+        envdata <- raster::getData(name=name, var="bio", res=res, path=path)
+        envdata <- raster::crop(envdata, extent)
+        if(unique(variables == "bio")==TRUE){variables <- c("bio1", "bio5", "bio6", "bio7", "bio8", "bio9", 
+                                                "bio10", "bio11", "bio12", "bio13", "bio14", 
+                                                "bio15", "bio16", "bio17", "bio18", "bio19")}
+        # Subset data by variables
+        envdata <- envdata[[variables]]
         
-        #Mean of tmin and tmax
-        if("tmin" %in% var){
-          envdata[[which("tmin" == var)]] <- raster::setZ(envdata[[which("tmin" == var)]], tm, 'months')
-          envdata[[which("tmin" == var)]] <- raster::zApply(envdata[[which("tmin" == var)]], 
-                                                            by=zoo::as.yearqtr, fun=min, name='quarters')}
-        if("tmax" %in% var){
-          envdata[[which("tmax" == var)]] <- raster::setZ(envdata[[which("tmax" == var)]], tm, 'months')
-          envdata[[which("tmax" == var)]] <- raster::zApply(envdata[[which("tmax" == var)]], 
-                                                            by=zoo::as.yearqtr, fun=max, name='quarters')}
-        # Sum of prec
-        if("prec" %in% var){
-          envdata[[which("prec" == var)]] <- raster::setZ(envdata[[which("prec" == var)]], tm, 'months')
-          envdata[[which("prec" == var)]] <- raster::zApply(envdata[[which("prec" == var)]], 
-                                                            by=zoo::as.yearqtr, fun=sum, name='quarters')}
-        time <- c("Q1", "Q2", "Q3", "Q4")
+        # Convert temperature values into degree C
+        env_temp <- envdata[[variables[variables %in% c("bio1", "bio5", "bio6", "bio7", "bio8", "bio9", "bio10", "bio11")]]]/ 10
+        env_prec <- envdata[[variables[! variables %in% c("bio1", "bio5", "bio6", "bio7", "bio8", "bio9", "bio10", "bio11")]]]
+        envdata <- raster::stack(env_temp, env_prec); rm(env_temp, env_prec)
       } else{
-        time <- month.abb
+        # Get data
+        envdata <- lapply(variables, FUN=function(z){
+          data <- raster::getData(name=name, var=z, res=res, path=path)
+          raster::crop(data, extent)})
+        # Convert temperature values into degree C
+        if("tmin" %in% variables){envdata[[which(variables == "tmin")]] <- envdata[[which(variables == "tmin")]]/10}
+        if("tmax" %in% variables){envdata[[which(variables == "tmax")]] <- envdata[[which(variables == "tmax")]]/10}
       }
-      # Extract envdata for points
-      envdata <- do.call("cbind", lapply(1:length(envdata), FUN=function(x){
-        data <- data.frame(raster::extract(envdata[[x]], data[,c(lon,lat)]))
-        colnames(data) <- time
-        data <- tidyr::gather(data, "month", "var")
-        colnames(data) <- c("time", var[x])
-        return(data)
-      }))
-      #envdata %>% dplyr::arrange(time)
-      envdata <- envdata[,c(1,seq(2,ncol(envdata),by=2))]
-    } else{
-      stop("Wrong temporal resolution (tres) supplied. Should be one of month, quarter, year.")
+      #}
     }
+    
+    # Calculate mean and sum by year, quarter or month for tmin, tmax and prec
+    if(unique(variables %in% c("tmin", "tmax", "prec")) == TRUE){
+      if(tres == "year"){
+        #Mean of tmin and tmax
+        if("tmin" %in% variables){envdata[[which("tmin" == variables)]] <- raster::calc(envdata[[which("tmin" == variables)]], mean)}
+        if("tmax" %in% variables){envdata[[which("tmax" == variables)]] <- raster::calc(envdata[[which("tmax" == variables)]], mean)}
+        # Sum of prec
+        if("prec" %in% variables){envdata[[which("prec" == variables)]] <- raster::calc(envdata[[which("prec" == variables)]], sum)}
+        
+        # Extract envdata for points
+        envdata <- data.frame(do.call("cbind", lapply(envdata, FUN=function(x){
+          raster::extract(x, data[,c(lon,lat)])})))
+        colnames(envdata) <- variables
+      } else if(tres %in% c("quarter", "month")){
+        if(tres == "quarter"){
+          # time
+          tm <- seq(as.Date('1000-01-15'), as.Date('1000-12-15'), 'month') # Year is irrelevant
+          
+          #Mean of tmin and tmax
+          if("tmin" %in% variables){
+            envdata[[which("tmin" == variables)]] <- raster::setZ(envdata[[which("tmin" == variables)]], tm, 'months')
+            envdata[[which("tmin" == variables)]] <- raster::zApply(envdata[[which("tmin" == variables)]], 
+                                                              by=zoo::as.yearqtr, fun=min, name='quarters')}
+          if("tmax" %in% variables){
+            envdata[[which("tmax" == variables)]] <- raster::setZ(envdata[[which("tmax" == variables)]], tm, 'months')
+            envdata[[which("tmax" == variables)]] <- raster::zApply(envdata[[which("tmax" == variables)]], 
+                                                              by=zoo::as.yearqtr, fun=max, name='quarters')}
+          # Sum of prec
+          if("prec" %in% variables){
+            envdata[[which("prec" == variables)]] <- raster::setZ(envdata[[which("prec" == variables)]], tm, 'months')
+            envdata[[which("prec" == variables)]] <- raster::zApply(envdata[[which("prec" == variables)]], 
+                                                              by=zoo::as.yearqtr, fun=sum, name='quarters')}
+          time <- c("Q1", "Q2", "Q3", "Q4")
+        } else{
+          time <- month.abb
+        }
+        # Extract envdata for points
+        envdata <- do.call("cbind", lapply(1:length(envdata), FUN=function(x){
+          data <- data.frame(raster::extract(envdata[[x]], data[,c(lon,lat)]))
+          colnames(data) <- time
+          data <- tidyr::gather(data, "month", "var")
+          colnames(data) <- c("time", variables[x])
+          return(data)
+        }))
+        #envdata %>% dplyr::arrange(time)
+        envdata <- envdata[,c(1,seq(2,ncol(envdata),by=2))]
+      } else{
+        stop("Wrong temporal resolution (tres) supplied. Should be one of month, quarter, year.")
+      }
+    } else{
+      envdata <- data.frame(raster::extract(envdata, data[,c(lon,lat)]))
+      colnames(envdata) <- variables
+    }
+    
+    # Merge data with locations
+    envdata <- cbind(data[,"species"], envdata)
+    
+    # Set colnames to variablesnames
+    colnames(envdata)[1] <- c("species")
+    
+    # Remove NAs
+    envdata <- stats::na.omit(envdata)
+    
+    # Change data format
+    if(tres!="year"){
+      envdata <- tidyr::gather(envdata, "var", "value", -c(species,time))
+      envdata$time <- factor(envdata$time, levels=time)
+    } else{
+      envdata <- tidyr::gather(envdata, "var", "value", -species)
+    }
+    
+    # Order variables factor
+    envdata$var <- factor(envdata$var)
+    if(any(c("tmin", "tmax", "prec") %in% variables)){
+      envdata$var <- factor(envdata$var, levels=c("tmin", "tmax", "prec"))
+    } else if(any(c("bio1", "bio2", "bio3", "bio4", "bio5", "bio6", "bio7", "bio8", 
+                    "bio9", "bio10", "bio11", "bio12", "bio13", "bio14", "bio15", 
+                    "bio16", "bio17", "bio18", "bio19") %in% variables)){
+      envdata$var <- factor(envdata$var, 
+                            levels=c("bio1", "bio2", "bio3", "bio4", "bio5", "bio6", "bio7", "bio8", 
+                                     "bio9", "bio10", "bio11", "bio12", "bio13", "bio14", 
+                                     "bio15", "bio16", "bio17", "bio18", "bio19"))
+    }
+    envdata$var <- droplevels(envdata$var)
   } else{
-    envdata <- data.frame(raster::extract(envdata, data[,c(lon,lat)]))
-    colnames(envdata) <- var
+    # Subset data by variables
+   envdata <- data %>% tidyr::pivot_longer(cols = tidyselect::any_of(c("bio1", "bio2", "bio3", "bio4", "bio5", "bio6", "bio7", "bio8", 
+                                                                      "bio9", "bio10", "bio11", "bio12", "bio13", "bio14", 
+                                                                      "bio15", "bio16", "bio17", "bio18", "bio19")), 
+                                            names_to="var", values_to="value")
+   envdata <- envdata[envdata$var %in% variables,]
+   envdata$var <- as.factor(envdata$var)
   }
-  
-  # Merge data with locations
-  envdata <- cbind(data[,"species"], envdata)
-  
-  # Set colnames to varnames
-  colnames(envdata)[1] <- c("species")
-  
-  # Remove NAs
-  envdata <- stats::na.omit(envdata)
-  
-  # Change data format
-  if(tres!="year"){
-    envdata <- tidyr::gather(envdata, "var", "value", -c(species,time))
-    envdata$time <- factor(envdata$time, levels=time)
-  } else{
-    envdata <- tidyr::gather(envdata, "var", "value", -species)
-  }
-  
-  # Order variable factor
-  envdata$var <- factor(envdata$var)
-  if(any(c("tmin", "tmax", "prec") %in% var)){
-    envdata$var <- factor(envdata$var, levels=c("tmin", "tmax", "prec"))
-  } else if(any(c("bio1", "bio2", "bio3", "bio4", "bio5", "bio6", "bio7", "bio8", 
-                  "bio9", "bio10", "bio11", "bio12", "bio13", "bio14", "bio15", 
-                  "bio16", "bio17", "bio18", "bio19") %in% var)){
-    envdata$var <- factor(envdata$var, 
-                          levels=c("bio1", "bio2", "bio3", "bio4", "bio5", "bio6", "bio7", "bio8", 
-                                   "bio9", "bio10", "bio11", "bio12", "bio13", "bio14", 
-                                   "bio15", "bio16", "bio17", "bio18", "bio19"))
-  }
-  envdata$var <- droplevels(envdata$var)
   
   if(any(c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
-           "bio7", "bio8", "bio9", "bio10", "bio11") %in% var)){
+           "bio7", "bio8", "bio9", "bio10", "bio11") %in% variables)){
     # Define temperature breaks
     t_range <- range(envdata$value[envdata$var %in% 
                                      c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
@@ -250,9 +269,9 @@ displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10,
   }
   
   if(any(c("prec","bio12", "bio13", "bio14", "bio15", 
-           "bio16", "bio17", "bio18", "bio19") %in% var)){
+           "bio16", "bio17", "bio18", "bio19") %in% variables)){
     if(any(c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
-             "bio7", "bio8", "bio10", "bio11") %in% var)){
+             "bio7", "bio8", "bio10", "bio11") %in% variables)){
       # Define precipitation breaks
       if(max(envdata$value[envdata$var %in% 
                            c("prec","bio12", "bio13", "bio14", "bio15", 
@@ -292,7 +311,7 @@ displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10,
   }
   
   # Determine orientation of axes label and plot margins
-  if(length(var) > 5 | tres == "month"){
+  if(length(variables) > 5 | tres == "month"){
     las=2
     graphics::par(mar = c(4.5,5,1.5,7.5)+.1, bg="transparent", cex.lab=1.5, cex.axis=1.2)
   } else{
@@ -302,44 +321,44 @@ displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10,
   
   # Create plot
   if(tres != "year"){
-    col <- var
+    col <- variables
     col[which(col == "tmin")] <- "dodgerblue"
-    col[which(col == "tmax")] <- "darkblue"
-    col[which(col == "prec")] <- "red"
-    graphics::boxplot(value ~ var:time, envdata, pch=19, col=col, xlab="", ylab="", axes=F)
-    graphics::legend('topright', horiz = F, fill = col, legend = levels(envdata$var), 
-                     bty = 'n')
-    graphics::axis(side=1, at=seq(1, nlevels(envdata$time)*nlevels(envdata$var), 
-                                  by=nlevels(envdata$var))+(0.5*nlevels(envdata$var)-0.5), 
-                   labels=levels(envdata$time), las=las)
-    col.axis <- c("blue", "red")
+      col[which(col == "tmax")] <- "darkblue"
+        col[which(col == "prec")] <- "red"
+          graphics::boxplot(value ~ var:time, envdata, pch=19, col=col, xlab="", ylab="", axes=F)
+          graphics::legend('topright', horiz = F, fill = col, legend = levels(envdata$var), 
+                           bty = 'n')
+          graphics::axis(side=1, at=seq(1, nlevels(envdata$time)*nlevels(envdata$var), 
+                                        by=nlevels(envdata$var))+(0.5*nlevels(envdata$var)-0.5), 
+                         labels=levels(envdata$time), las=las)
+          col.axis <- c("blue", "red")
   } else if(nlevels(envdata$species) > 1){
     col <- ggsci::pal_d3("category10")(nlevels(envdata$species))
     graphics::boxplot(value ~ species:var, envdata, pch=19, col=col, xlab="", ylab="", axes=F)
-    graphics::abline(v=length(which(var %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
+    graphics::abline(v=length(which(variables %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
                                                "bio7", "bio8", "bio9", "bio10", "bio11")))*nlevels(envdata$species)+0.5, 
                      col="grey", lty="dashed")
     graphics::legend('topright', horiz = F, fill = col, legend = levels(envdata$species), 
                      bty = 'n')
     graphics::axis(side=1, at=seq(1, nlevels(envdata$var)*nlevels(envdata$species), 
-                                  by=nlevels(envdata$species))+(0.5*nlevels(envdata$species)-0.5), 
+                                  by= nlevels(envdata$species))+(0.5*nlevels(envdata$species)-0.5), 
                    labels=levels(envdata$var), las=las)
     col.axis <- c("black", "black")
   } else{
-    col <- var
+    col <- variables
     col[which(col %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
                          "bio7", "bio8", "bio9", "bio10", "bio11"))] <- "blue"
-    col[col != "blue"] <- "red"
-    graphics::boxplot(value ~ var, envdata, pch=19, col=col, xlab="", ylab="", axes=F)
-    graphics::abline(v=length(which(var %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
-                                               "bio7", "bio8", "bio9", "bio10", "bio11")))+0.5, 
-                     col="grey59", lty="dashed")
-    graphics::axis(side=1, at=seq(1,nlevels(envdata$var), 
-                                  length.out=nlevels(envdata$var)), 
-                   labels=levels(envdata$var), las=las)
-    col.axis <- c("blue", "red")
+      col[col != "blue"] <- "red"
+        graphics::boxplot(value ~ var, envdata, pch=19, col=col, xlab="", ylab="", axes=F)
+        graphics::abline(v=length(which(variables %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
+                                                   "bio7", "bio8", "bio9", "bio10", "bio11")))+0.5, 
+                         col="grey59", lty="dashed")
+        graphics::axis(side=1, at=seq(1,nlevels(envdata$var), 
+                                      length.out=nlevels(envdata$var)), 
+                       labels=levels(envdata$var), las=las)
+        col.axis <- c("blue", "red")
   }
-  if(any(var %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
+  if(any(variables %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
                     "bio7", "bio8", "bio9", "bio10", "bio11"))){
     graphics::axis(side=2, at=seq(floor(min(envdata$value)/t_breaks)*t_breaks, 
                                   ceiling(max(envdata$value)/t_breaks)*t_breaks, by=t_breaks), 
@@ -347,9 +366,9 @@ displayNiche <- function(data, lon="x", lat="y", name="worldclim", res=10,
     graphics::mtext(side = 2, line=4, expression(paste("Temperature (",degree,"C)")), 
                     cex=1.5, col=col.axis[1], padj=1)
   }
-  if(any(var %in% c("prec","bio12", "bio13", "bio14", "bio15", "bio16", 
+  if(any(variables %in% c("prec","bio12", "bio13", "bio14", "bio15", "bio16", 
                     "bio17", "bio18", "bio19"))){
-    if(any(var %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
+    if(any(variables %in% c("tmin", "tmax","bio1", "bio2", "bio3", "bio4", "bio5", "bio6", 
                       "bio7", "bio8", "bio9", "bio10", "bio11"))){
       graphics::axis(side=4, at=seq(min(envdata$value), max(envdata$value), by=p_breaks*max_offset), 
                      labels=seq((min(envdata$value)-offset)/max_offset, 
